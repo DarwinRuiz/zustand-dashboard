@@ -1,8 +1,15 @@
 import { FormEvent } from 'react';
+import { useAuthStore } from '../../stores';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export const LoginPage = () => {
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const navigate = useNavigate();
+
+  const loginUser = useAuthStore(state => state.loginUser);
+
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // const { username, password, remember } = event.target as HTMLFormElement;
     const { username, password, remember } = event.target as typeof event.target & {
@@ -11,9 +18,23 @@ export const LoginPage = () => {
       remember: { checked: boolean }
     };
 
-    username.value = '';
-    password.value = '';
-    remember.checked = false;
+    try {
+      await loginUser(username.value, password.value);
+      navigate('/dashboard');
+
+      // username.value = '';
+      // password.value = '';
+      // remember.checked = false;
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Usuario o contraseña incorrectos',
+        confirmButtonColor: '#2563EB'
+      })
+    }
+
+
   }
 
 
@@ -24,7 +45,7 @@ export const LoginPage = () => {
       <form onSubmit={onSubmit}>
 
         <div className="mb-4">
-          <label className="block text-gray-600">Username</label>
+          <label className="block text-gray-600">Email</label>
           <input type="text" name="username" autoComplete="off" />
         </div>
 
